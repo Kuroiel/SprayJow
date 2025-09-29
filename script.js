@@ -31,7 +31,7 @@ window.addEventListener('mousemove', (event) => {
     const angleInDegrees = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
 
     // Apply the rotation to the spray bottle
-    sprayBottle.style.transform = `rotate(${angleInDegrees}deg)`;
+    sprayBottle.style.transform = `rotate(${angleInDegrees + 180}deg)`;
 });
 
 // --- Part 3: Handle the spraying action on click ---
