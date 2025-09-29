@@ -7,16 +7,14 @@ const scoreCounter = document.getElementById('score-counter');
 // Initialize the score
 let score = 0;
 
-// NEW: We need to store the bottle's state in variables
+// Store the bottle's state in variables
 let currentAngle = 0;
 let isSpraying = false;
 
-// NEW: A central function to update the bottle's transform property
-// This ensures that rotation and scaling are applied together correctly.
+// A central function to update the bottle's transform property
 function updateBottleTransform() {
     let transformString = `rotate(${currentAngle}deg)`;
     if (isSpraying) {
-        // If we are spraying, add the scale effect
         transformString += ' scale(0.95)';
     }
     sprayBottle.style.transform = transformString;
@@ -28,7 +26,7 @@ window.addEventListener('mousemove', (event) => {
     const mouseX = event.clientX;
     const mouseY = event.clientY;
 
-    // Position the bottle's nozzle at the cursor (this part is still correct)
+    // Position the bottle's PIVOT POINT (0% 50%) at the cursor
     const bottleHeight = sprayBottle.offsetHeight;
     sprayBottle.style.left = `${mouseX}px`;
     sprayBottle.style.top = `${mouseY - (bottleHeight / 2)}px`;
@@ -41,9 +39,8 @@ window.addEventListener('mousemove', (event) => {
     const deltaY = jowCenterY - mouseY;
     const angleInDegrees = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
 
-    // MODIFIED: Instead of setting the style directly, we store the angle...
+    // Store the angle and update the visual transform
     currentAngle = angleInDegrees + 180;
-    // ...and then call our new update function.
     updateBottleTransform();
 });
 
@@ -53,21 +50,38 @@ window.addEventListener('click', (event) => {
     score++;
     scoreCounter.textContent = `Times Jow has been sprayed: ${score}`;
 
-    // 2. MODIFIED: Handle the kickback animation in JavaScript
-    // We no longer add/remove a CSS class.
-    if (!isSpraying) { // Prevents re-triggering the animation if clicking rapidly
+    // 2. Handle the kickback animation
+    if (!isSpraying) {
         isSpraying = true;
-        updateBottleTransform(); // Apply the scale immediately
-
-        // Set a timer to remove the scale effect
+        updateBottleTransform();
         setTimeout(() => {
             isSpraying = false;
-            updateBottleTransform(); // Update transform back to normal
-        }, 100); // Animation duration of 100ms
+            updateBottleTransform();
+        }, 100);
     }
 
-    // 3. Create and animate water particles (this part doesn't need to change)
-    createWaterSpray(event.clientX, event.clientY);
+    // 3. --- THIS IS THE MAJOR FIX ---
+    // Calculate the true position of the nozzle before spraying.
+
+    // Define the offset. Based on your description, the nozzle is about 20px
+    // "above" the pivot point when the bottle is pointing right (0 degrees).
+    // You can TWEAK THIS VALUE to get it pixel perfect!
+    const nozzleOffset = -20; // Negative because it's "up"
+
+    // We need the angle in radians for trigonometry (Math.cos, Math.sin)
+    // The angle we stored (`currentAngle`) is what the bottle is visually showing.
+    const angleInRadians = currentAngle * (Math.PI / 180);
+
+    // Use trigonometry to calculate the nozzle's actual screen position
+    // startX/Y is the pivot point (the mouse cursor's location)
+    const startX = event.clientX;
+    const startY = event.clientY;
+    
+    const nozzleX = startX + (nozzleOffset * Math.sin(angleInRadians));
+    const nozzleY = startY - (nozzleOffset * Math.cos(angleInRadians));
+
+    // 4. Create the spray from the CALCULATED nozzle position, not the mouse position.
+    createWaterSpray(nozzleX, nozzleY);
 });
 
 // --- Function to create the water spray effect (Unchanged) ---
@@ -77,6 +91,7 @@ function createWaterSpray(startX, startY) {
         const particle = document.createElement('div');
         particle.classList.add('water-particle');
         gameContainer.appendChild(particle);
+        // Start particles at the calculated nozzle position
         particle.style.left = `${startX}px`;
         particle.style.top = `${startY}px`;
         const jowRect = jowImage.getBoundingClientRect();
