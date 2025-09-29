@@ -1,0 +1,78 @@
+/* Make the whole page use the full screen and hide scrollbars */
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    overflow: hidden; /* Prevents scrollbars if things go off-screen */
+    cursor: none; /* Hide the default mouse cursor */
+}
+
+/* The main container for our game elements */
+#game-container {
+    position: relative; /* This is crucial for positioning children elements */
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; /* Stack items vertically */
+}
+
+/* The title "Jow" */
+h1 {
+    font-size: 3em;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* The target image */
+#jow-image {
+    width: 200px; /* Adjust size as needed */
+    height: 200px;
+    border-radius: 50%; /* Make it a circle */
+    border: 5px solid #555;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* The spray bottle image that follows the mouse */
+#spray-bottle {
+    position: absolute; /* Allows us to position it with top/left values */
+    width: 100px; /* Adjust size as needed */
+    /* This is VERY important. It makes the bottle rotate around its nozzle (left-center) */
+    transform-origin: 0% 50%;
+    /* A little animation for the click */
+    transition: transform 0.1s ease-out;
+}
+
+/* This class will be added via JavaScript when we click */
+#spray-bottle.spraying {
+    /* A little "kickback" animation */
+    transform: scale(0.95);
+}
+
+/* The score counter at the top */
+#score-counter {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%); /* Centers it perfectly */
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #444;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px 20px;
+    border-radius: 10px;
+}
+
+/* Styling for the water particles we will create with JavaScript */
+.water-particle {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background-color: #3498db;
+    border-radius: 50%;
+    opacity: 1;
+    /* We will control the animation with JavaScript */
+    transition: all 0.5s linear;
+}
