@@ -45,12 +45,6 @@ h1 {
     transition: transform 0.1s ease-out;
 }
 
-/* This class will be added via JavaScript when we click */
-#spray-bottle.spraying {
-    /* A little "kickback" animation */
-    transform: scale(0.95);
-}
-
 /* The score counter at the top */
 #score-counter {
     position: absolute;
