@@ -7,85 +7,90 @@ const scoreCounter = document.getElementById('score-counter');
 // Initialize the score
 let score = 0;
 
-// --- Part 1: Make the spray bottle follow the mouse ---
+// NEW: We need to store the bottle's state in variables
+let currentAngle = 0;
+let isSpraying = false;
+
+// NEW: A central function to update the bottle's transform property
+// This ensures that rotation and scaling are applied together correctly.
+function updateBottleTransform() {
+    let transformString = `rotate(${currentAngle}deg)`;
+    if (isSpraying) {
+        // If we are spraying, add the scale effect
+        transformString += ' scale(0.95)';
+    }
+    sprayBottle.style.transform = transformString;
+}
+
+// --- Make the spray bottle follow and aim ---
 window.addEventListener('mousemove', (event) => {
     // Get mouse position
     const mouseX = event.clientX;
     const mouseY = event.clientY;
 
-    // Position the spray bottle's top-left corner at the mouse cursor
-    // We subtract half its width/height to center it, but let's just do top-left for simplicity
-const bottleHeight = sprayBottle.offsetHeight;
-sprayBottle.style.left = `${mouseX}px`;
-sprayBottle.style.top = `${mouseY - (bottleHeight / 2)}px`;
+    // Position the bottle's nozzle at the cursor (this part is still correct)
+    const bottleHeight = sprayBottle.offsetHeight;
+    sprayBottle.style.left = `${mouseX}px`;
+    sprayBottle.style.top = `${mouseY - (bottleHeight / 2)}px`;
 
-    // --- Part 2: Make the bottle aim at the center of Jow ---
-    // Get the position and dimensions of the Jow image
+    // Calculate the target angle
     const jowRect = jowImage.getBoundingClientRect();
     const jowCenterX = jowRect.left + jowRect.width / 2;
     const jowCenterY = jowRect.top + jowRect.height / 2;
-
-    // Calculate the angle between the mouse and the center of Jow
     const deltaX = jowCenterX - mouseX;
     const deltaY = jowCenterY - mouseY;
-    // Math.atan2 gives the angle in radians. We convert it to degrees.
     const angleInDegrees = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
 
-    // Apply the rotation to the spray bottle
-    sprayBottle.style.transform = `rotate(${angleInDegrees + 180}deg)`;
+    // MODIFIED: Instead of setting the style directly, we store the angle...
+    currentAngle = angleInDegrees + 180;
+    // ...and then call our new update function.
+    updateBottleTransform();
 });
 
-// --- Part 3: Handle the spraying action on click ---
+// --- Handle the spraying action on click ---
 window.addEventListener('click', (event) => {
     // 1. Update the score
     score++;
     scoreCounter.textContent = `Times Jow has been sprayed: ${score}`;
 
-    // 2. Add the "spraying" class for the kickback animation
-    sprayBottle.classList.add('spraying');
-    // Remove the class after a short time so the animation can run again
-    setTimeout(() => {
-        sprayBottle.classList.remove('spraying');
-    }, 100); // 100 milliseconds
+    // 2. MODIFIED: Handle the kickback animation in JavaScript
+    // We no longer add/remove a CSS class.
+    if (!isSpraying) { // Prevents re-triggering the animation if clicking rapidly
+        isSpraying = true;
+        updateBottleTransform(); // Apply the scale immediately
 
-    // 3. Create and animate water particles
+        // Set a timer to remove the scale effect
+        setTimeout(() => {
+            isSpraying = false;
+            updateBottleTransform(); // Update transform back to normal
+        }, 100); // Animation duration of 100ms
+    }
+
+    // 3. Create and animate water particles (this part doesn't need to change)
     createWaterSpray(event.clientX, event.clientY);
 });
 
-// --- Part 4: Function to create the water spray effect ---
+// --- Function to create the water spray effect (Unchanged) ---
 function createWaterSpray(startX, startY) {
-    const particleCount = 20; // How many drops to spray
-
+    const particleCount = 20;
     for (let i = 0; i < particleCount; i++) {
-        // Create a new div element for the particle
         const particle = document.createElement('div');
         particle.classList.add('water-particle');
         gameContainer.appendChild(particle);
-
-        // Start the particle at the mouse's position (nozzle of the bottle)
         particle.style.left = `${startX}px`;
         particle.style.top = `${startY}px`;
-
-        // Get the Jow image's center again to aim the particles
         const jowRect = jowImage.getBoundingClientRect();
         const endX = jowRect.left + jowRect.width / 2;
         const endY = jowRect.top + jowRect.height / 2;
-
-        // Add some randomness to the end position to create a "spray" effect
-        const randomX = endX + (Math.random() - 0.5) * 80; // Spread of 80px
+        const randomX = endX + (Math.random() - 0.5) * 80;
         const randomY = endY + (Math.random() - 0.5) * 80;
-
-        // Use a short timeout to make the browser update the particle's initial position
-        // before we tell it to transition to the end position. This makes the animation work.
         setTimeout(() => {
             particle.style.left = `${randomX}px`;
             particle.style.top = `${randomY}px`;
             particle.style.opacity = '0';
         }, 10);
-
-        // Remove the particle from the page after the animation is finished
         setTimeout(() => {
             particle.remove();
-        }, 500); // 500ms, matching our CSS transition time
+        }, 500);
     }
 }
