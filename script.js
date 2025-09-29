@@ -15,8 +15,9 @@ window.addEventListener('mousemove', (event) => {
 
     // Position the spray bottle's top-left corner at the mouse cursor
     // We subtract half its width/height to center it, but let's just do top-left for simplicity
-    sprayBottle.style.left = `${mouseX}px`;
-    sprayBottle.style.top = `${mouseY}px`;
+const bottleHeight = sprayBottle.offsetHeight;
+sprayBottle.style.left = `${mouseX}px`;
+sprayBottle.style.top = `${mouseY - (bottleHeight / 2)}px`;
 
     // --- Part 2: Make the bottle aim at the center of Jow ---
     // Get the position and dimensions of the Jow image
