@@ -66,7 +66,7 @@ window.addEventListener('click', (event) => {
     // Define the offset. Based on your description, the nozzle is about 20px
     // "above" the pivot point when the bottle is pointing right (0 degrees).
     // You can TWEAK THIS VALUE to get it pixel perfect!
-    const nozzleOffset = -20; // Negative because it's "up"
+    const nozzleOffset = 40; // Negative because it's "up"
 
     // We need the angle in radians for trigonometry (Math.cos, Math.sin)
     // The angle we stored (`currentAngle`) is what the bottle is visually showing.
